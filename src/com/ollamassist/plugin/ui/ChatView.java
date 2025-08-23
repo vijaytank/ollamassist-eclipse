@@ -1,5 +1,7 @@
 package com.ollamassist.plugin.ui;
 
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.KeyAdapter;
@@ -13,6 +15,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
 
 import com.ollamassist.plugin.service.OllamaClient;
+import com.ollamassist.plugin.setup.ModelFetcher;
+import com.ollamassist.plugin.setup.SetupConfig;
 
 public class ChatView extends ViewPart {
 
@@ -29,7 +33,10 @@ public class ChatView extends ViewPart {
 
 		// 🔹 Model Selector
 		modelSelector = new Combo(container, SWT.DROP_DOWN | SWT.READ_ONLY);
-		modelSelector.setItems(new String[] { "llama3.1", "mistral", "custom" });
+		List<String> models = ModelFetcher.getInstalledModels();
+		modelSelector.setItems(models.toArray(new String[0]));
+		modelSelector.select(0); // Optional default
+		SetupConfig.set("model", modelSelector.getText());
 		modelSelector.select(0);
 		modelSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
