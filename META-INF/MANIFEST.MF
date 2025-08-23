@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OllamAssist Plugin
+Bundle-SymbolicName: com.ollamassist.plugin;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Activator: com.ollamassist.plugin.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jface.text,
+ org.eclipse.ui.editors,
+ org.eclipse.core.resources
+Bundle-RequiredExecutionEnvironment: JavaSE-11

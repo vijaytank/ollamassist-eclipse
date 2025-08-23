@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+
+   <!-- 🔹 Perspective -->
+   <extension point="org.eclipse.ui.perspectives">
+      <perspective
+            name="OllamAssist"
+            class="com.ollamassist.plugin.ui.OllamPerspective"
+            id="com.ollamassist.plugin.ui.OllamPerspective"/>
+   </extension>
+
+   <!-- 🔹 Chat View -->
+   <extension point="org.eclipse.ui.views">
+      <view
+            name="OllamAssist"
+            class="com.ollamassist.plugin.ui.ChatView"
+            id="com.ollamassist.plugin.ui.ChatView"/>
+   </extension>
+
+   <!-- 🔹 Editor with Autocomplete -->
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="com.ollamassist.plugin.autocomplete.OllamaEditor"
+            name="Ollama Editor"
+            icon="icons/editor.png"
+            class="com.ollamassist.plugin.autocomplete.OllamaEditor"
+            extensions="java,txt"/>
+   </extension>
+
+   <!-- 🔹 Place Chat View on Left -->
+   <extension point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="com.ollamassist.plugin.ui.OllamPerspective">
+         <view
+      id="com.ollamassist.plugin.ui.ChatView"
+      relative="org.eclipse.ui.editors"
+      relationship="left"
+      visible="true"
+      ratio="0.25"/>
+
+      </perspectiveExtension>
+   </extension>
+
+</plugin>
