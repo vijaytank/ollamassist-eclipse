@@ -1,13 +1,7 @@
 package com.ollamassist.plugin.autocomplete;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.contentassist.CompletionProposal;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.*;
+import org.eclipse.jface.text.contentassist.*;
 
 public class OllamaContentAssistProcessor implements IContentAssistProcessor {
 
@@ -47,12 +41,12 @@ public class OllamaContentAssistProcessor implements IContentAssistProcessor {
 
     @Override
     public char[] getCompletionProposalAutoActivationCharacters() {
-        return new char[] { ' ' }; // Trigger on Shift+Space
+        return new char[] { ' ' };
     }
 
     @Override
     public char[] getContextInformationAutoActivationCharacters() {
-        return new char[0]; // No auto-activation for context info
+        return new char[0];
     }
 
     @Override
@@ -64,10 +58,7 @@ public class OllamaContentAssistProcessor implements IContentAssistProcessor {
     public IContextInformationValidator getContextInformationValidator() {
         return new IContextInformationValidator() {
             @Override
-            public void install(IContextInformation info, ITextViewer viewer, int offset) {
-                // No-op
-            }
-
+            public void install(IContextInformation info, ITextViewer viewer, int offset) {}
             @Override
             public boolean isContextInformationValid(int offset) {
                 return true;

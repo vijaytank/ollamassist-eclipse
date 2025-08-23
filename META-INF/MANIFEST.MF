@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+Automatic-Module-Name: com.ollamassist.plugin
 Bundle-Name: OllamAssist Plugin
 Bundle-SymbolicName: com.ollamassist.plugin;singleton:=true
 Bundle-Version: 1.0.0

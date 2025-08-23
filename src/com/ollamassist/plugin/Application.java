@@ -10,39 +10,39 @@ import org.eclipse.ui.application.WorkbenchAdvisor;
 
 public class Application implements IApplication {
 
-    @Override
-    public Object start(IApplicationContext context) throws Exception {
-        Display display = PlatformUI.createDisplay();
-        try {
-            int returnCode = PlatformUI.createAndRunWorkbench(display, new WorkbenchAdvisor() {
-                @Override
-                public String getInitialWindowPerspectiveId() {
-                    return "com.ollamassist.plugin.perspective";
-                }
-            });
+	@Override
+	public Object start(IApplicationContext context) throws Exception {
+		Display display = PlatformUI.createDisplay();
+		try {
+			int returnCode = PlatformUI.createAndRunWorkbench(display, new WorkbenchAdvisor() {
+				@Override
+				public String getInitialWindowPerspectiveId() {
+					return "com.ollamassist.plugin.perspective";
+				}
+			});
 
-            display.asyncExec(() -> {
-                IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-                if (window != null) {
-                    IWorkbenchPage page = window.getActivePage();
-                    if (page != null) {
-                        try {
-                            page.showView("com.ollamassist.plugin.ui.ChatView");
-                        } catch (Exception e) {
-                            System.err.println("Failed to open ChatView: " + e.getMessage());
-                        }
-                    }
-                }
-            });
+			display.asyncExec(() -> {
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				if (window != null) {
+					IWorkbenchPage page = window.getActivePage();
+					if (page != null) {
+						try {
+							page.showView("com.ollamassist.plugin.ui.ChatView");
+						} catch (Exception e) {
+							System.err.println("Failed to open ChatView: " + e.getMessage());
+						}
+					}
+				}
+			});
 
-            return returnCode == PlatformUI.RETURN_RESTART ? IApplication.EXIT_RESTART : IApplication.EXIT_OK;
-        } finally {
-            display.dispose();
-        }
-    }
+			return returnCode == PlatformUI.RETURN_RESTART ? IApplication.EXIT_RESTART : IApplication.EXIT_OK;
+		} finally {
+			display.dispose();
+		}
+	}
 
-    @Override
-    public void stop() {
-        // Optional cleanup
-    }
+	@Override
+	public void stop() {
+		// Optional cleanup
+	}
 }
