@@ -1,6 +1,6 @@
-# OllamAssist Plugin for Eclipse
+# LocalLlama Plugin for Eclipse
 
-**OllamAssist** is a privacy-first AI assistant designed to integrate seamlessly with Eclipse. Powered by local Ollama models, it enhances developer productivity through intelligent code interactions, commit message generation, and smart autocompletion—all without sending data to the cloud.
+**LocalLlama** is a privacy-first AI assistant designed to integrate seamlessly with Eclipse. Powered by local Ollama models, it enhances developer productivity through intelligent code interactions, commit message generation, and smart autocompletion—all without sending data to the cloud.
 
 ---
 

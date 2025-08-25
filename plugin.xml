@@ -4,36 +4,36 @@
    <!-- 🔹 Perspective -->
    <extension point="org.eclipse.ui.perspectives">
       <perspective
-            name="OllamAssist"
+            name="LocalLlama"
             icon="icons/images.png"
-            class="com.ollamassist.plugin.ui.OllamPerspective"
-            id="com.ollamassist.plugin.ui.OllamPerspective"/>
+            class="com.localllama.plugin.ui.LocalLlamaPerspective"
+            id="com.localllama.plugin.ui.LocalLlamaPerspective"/>
    </extension>
 
    <!-- 🔹 Chat View -->
    <extension point="org.eclipse.ui.views">
       <view
-            name="OllamAssist"
+            name="LocalLlama"
             icon="icons/images.png"
-            class="com.ollamassist.plugin.ui.ChatView"
-            id="com.ollamassist.plugin.ui.ChatView"/>
+            class="com.localllama.plugin.ui.ChatView"
+            id="com.localllama.plugin.ui.ChatView"/>
    </extension>
 
    <!-- 🔹 Editor with Autocomplete -->
    <extension point="org.eclipse.ui.editors">
       <editor
-            id="com.ollamassist.plugin.autocomplete.OllamaEditor"
-            name="Ollama Editor"
+            id="com.localllama.plugin.autocomplete.LocalLlamaEditor"
+            name="LocalLlama Editor"
             icon="icons/images.png"
-            class="com.ollamassist.plugin.autocomplete.OllamaEditor"
+            class="com.localllama.plugin.autocomplete.LocalLlamaEditor"
             extensions="java,txt"/>
    </extension>
 
    <!-- 🔹 Place Chat View on Left -->
    <extension point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension targetID="com.ollamassist.plugin.ui.OllamPerspective">
+      <perspectiveExtension targetID="com.localllama.plugin.ui.LocalLlamaPerspective">
          <view
-            id="com.ollamassist.plugin.ui.ChatView"
+            id="com.localllama.plugin.ui.ChatView"
             icon="icons/images.png"
             relative="org.eclipse.ui.editors"
             relationship="left"
@@ -44,70 +44,59 @@
 
    <!-- 🔹 First-Time Setup Wizard -->
    <extension point="org.eclipse.ui.startup">
-      <startup class="com.ollamassist.plugin.setup.SetupWizardLauncher"/>
+      <startup class="com.localllama.plugin.setup.SetupWizardLauncher"/>
    </extension>
 
    <!-- 🔹 Preferences Page -->
    <extension point="org.eclipse.ui.preferencePages">
       <page
-            id="com.ollamassist.plugin.preferences"
-            name="OllamAssist"
+            id="com.localllama.plugin.preferences"
+            name="LocalLlama"
             icon="icons/images.png"
-            class="com.ollamassist.plugin.preferences.OllamAssistPreferencePage"/>
+            class="com.localllama.plugin.preferences.LocalLlamaPreferencePage"/>
    </extension>
 
    <!-- 🔹 Command Category (corrected) -->
    <extension point="org.eclipse.ui.commands">
       <category
-            id="com.ollamassist.plugin.category"
-            name="OllamAssist Commands"/>
+            id="com.localllama.plugin.category"
+            name="LocalLlama Commands"/>
    </extension>
 
    <!-- 🔹 Setup Wizard Command -->
    <extension point="org.eclipse.ui.commands">
       <command
             id="com.ollamassist.plugin.setup.command"
-            name="Run OllamAssist Setup Wizard"
-            categoryId="com.ollamassist.plugin.category"/>
+            name="Run LocalLlama Setup Wizard"
+            categoryId="com.localllama.plugin.category"/>
    </extension>
 
    <extension point="org.eclipse.ui.handlers">
       <handler
-            commandId="com.ollamassist.plugin.setup.command"
-            class="com.ollamassist.plugin.setup.SetupWizardHandler"/>
-   </extension>
-
-   <!-- 🔹 Menu Item in Help -->
-   <extension point="org.eclipse.ui.menus">
-      <menuContribution locationURI="menu:help">
-         <command
-               commandId="com.ollamassist.plugin.setup.command"
-               label="OllamAssist Setup Wizard"
-               icon="icons/images.png"
-               style="push"/>
-      </menuContribution>
+            commandId="com.localllama.plugin.setup.command"
+            class="com.localllama.plugin.setup.SetupWizardHandler"/>
    </extension>
 
    <!-- ✅ Reopen Chat View Command -->
    <extension point="org.eclipse.ui.commands">
       <command
-            id="com.ollamassist.plugin.command.openChatView"
+            id="com.localllama.plugin.command.openChatView"
             name="Open OllamAssist Chat View"
             description="Reopen the OllamAssist Chat View"
-            categoryId="com.ollamassist.plugin.category"/>
+            categoryId="com.localllama.plugin.category"/>
    </extension>
 
    <extension point="org.eclipse.ui.handlers">
       <handler
-            commandId="com.ollamassist.plugin.command.openChatView"
-            class="com.ollamassist.plugin.handlers.OpenChatViewHandler"/>
+            commandId="com.localllama.plugin.command.openChatView"
+            class="com.localllama.plugin.handlers.OpenChatViewHandler"/>
    </extension>
 
    <extension point="org.eclipse.ui.menus">
       <menuContribution locationURI="menu:help">
          <command
-               commandId="com.ollamassist.plugin.command.openChatView"
-               label="Reopen OllamAssist Chat"
+               commandId="com.localllama.plugin.command.openChatView"
+               label="Reopen LocalLlama Chat"
                icon="icons/images.png"
                style="push"/>
       </menuContribution>
@@ -116,10 +105,10 @@
    <!-- 🔹 Java Autocomplete -->
    <extension point="org.eclipse.jdt.ui.javaCompletionProposalComputer">
       <proposalComputer
-            name="OllamAssist Proposals"
-            class="com.ollamassist.plugin.autocomplete.OllamaProposalComputer"
-            categoryId="com.ollamassist.plugin.category"
-            id="com.ollamassist.plugin.autocomplete.proposals"/>
+            name="LocalLlama Proposals"
+            class="com.localllama.plugin.autocomplete.LocalLlamaProposalComputer"
+            categoryId="com.localllama.plugin.category"
+            id="com.localllama.plugin.autocomplete.proposals"/>
    </extension>
 
 </plugin>
