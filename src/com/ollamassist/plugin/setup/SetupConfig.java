@@ -40,8 +40,7 @@ public class SetupConfig {
 				System.out.println("Config saved to: " + configPath.toAbsolutePath());
 			}
 		} catch (IOException e) {
-			System.err.println("Failed to save config: " + e.getMessage());
-			e.printStackTrace();
+			System.err.println("[SetupConfig] Save error: " + e.getMessage());
 		}
 	}
 
@@ -51,7 +50,7 @@ public class SetupConfig {
 			try (FileInputStream in = new FileInputStream(configPath.toFile())) {
 				props.load(in);
 			} catch (IOException e) {
-				System.err.println("Failed to load config: " + e.getMessage());
+				System.err.println("[SetupConfig] Load error: " + e.getMessage());
 			}
 		}
 	}

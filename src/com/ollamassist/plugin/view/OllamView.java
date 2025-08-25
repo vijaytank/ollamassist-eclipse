@@ -5,11 +5,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
 
-import com.ollamassist.plugin.service.OllamaClient;
+import com.ollamassist.plugin.util.OllamaQueryUtil;
 
 public class OllamView extends ViewPart {
 	public static final String ID = "com.ollamassist.plugin.view.OllamView";
@@ -35,10 +34,10 @@ public class OllamView extends ViewPart {
 			String prompt = inputText.getText().trim();
 			if (!prompt.isEmpty()) {
 				outputText.setText("Querying Ollama...");
-				Display.getDefault().asyncExec(() -> {
-					String response = OllamaClient.queryModel(prompt);
+				OllamaQueryUtil.asyncQuery(prompt, null, response -> {
 					outputText.setText(response);
 				});
+
 			}
 		});
 	}

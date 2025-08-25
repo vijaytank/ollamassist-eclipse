@@ -2,9 +2,10 @@ package com.ollamassist.plugin.setup;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+
+import com.ollamassist.plugin.util.WizardUIUtil;
 
 public class FinalConfirmationPage extends WizardPage {
 
@@ -18,8 +19,7 @@ public class FinalConfirmationPage extends WizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
-		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(1, false));
+		Composite container = WizardUIUtil.createContainer(parent);
 
 		summary = new Label(container, SWT.WRAP);
 		summary.setText(""); // Will be populated in setVisible()

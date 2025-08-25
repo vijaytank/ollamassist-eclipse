@@ -8,10 +8,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.ollamassist.plugin.rag.ProjectDependencyTracker;
+import com.ollamassist.plugin.util.OllamaPromptUtil;
+import com.ollamassist.plugin.util.SymbolExtractor;
 
 public class OllamaClient {
 
@@ -32,7 +32,8 @@ public class OllamaClient {
 		}
 
 		String fullPrompt = "Use this context from my workspace:\n" + context + "\nQuestion:\n" + prompt;
-		String payload = "{\"model\":\"llama3.1\",\"prompt\":\"" + escapeJson(fullPrompt) + "\",\"stream\":false}";
+		String payload = "{\"model\":\"llama3.1\",\"prompt\":\"" + OllamaPromptUtil.escapeJson(fullPrompt)
+				+ "\",\"stream\":false}";
 
 		try {
 			URL url = new URL(ENDPOINT);
@@ -57,32 +58,17 @@ public class OllamaClient {
 			reader.close();
 
 //            System.out.println("Raw response: " + response.toString());
-			return parseResponse(response.toString());
+			return OllamaPromptUtil.parseResponse(response.toString());
 		} catch (Exception e) {
 			return "Error: " + e.getMessage();
 		}
 	}
 
 	private static Set<String> extractSymbols(String prompt) {
-		Set<String> symbols = new HashSet<>();
-		Pattern pattern = Pattern.compile("\\b([A-Z][a-zA-Z0-9_]*)\\b");
-		Matcher matcher = pattern.matcher(prompt);
-		while (matcher.find()) {
-			symbols.add(matcher.group(1));
+		Set<String> relatedFiles = new HashSet<>();
+		for (String symbol : SymbolExtractor.extractFromPrompt(prompt)) {
+			relatedFiles.addAll(ProjectDependencyTracker.getFilesUsingSymbol(symbol));
 		}
-		return symbols;
-	}
-
-	private static String escapeJson(String input) {
-		return input.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
-	}
-
-	private static String parseResponse(String json) {
-		Pattern pattern = Pattern.compile("\"response\":\"(.*?)\"");
-		Matcher matcher = pattern.matcher(json);
-		if (matcher.find()) {
-			return matcher.group(1).replace("\\n", "\n");
-		}
-		return "⚠️ No response received from Ollama.";
+		return relatedFiles;
 	}
 }

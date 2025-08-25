@@ -2,12 +2,12 @@ package com.ollamassist.plugin.setup;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.ollamassist.plugin.rag.ProjectDependencyTracker;
+import com.ollamassist.plugin.util.WizardUIUtil;
 
 public class WorkspaceIndexPage extends WizardPage {
 
@@ -22,8 +22,7 @@ public class WorkspaceIndexPage extends WizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
-		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(1, false));
+		Composite container = WizardUIUtil.createContainer(parent);
 
 		indexButton = new Button(container, SWT.PUSH);
 		indexButton.setText("Index Workspace Now");

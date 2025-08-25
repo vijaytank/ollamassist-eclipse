@@ -7,4 +7,10 @@ public class CommitMessageGenerator {
 		String prompt = "Generate a concise commit message for this diff:\n" + diff;
 		return OllamaClient.queryModel(prompt);
 	}
+
+	public static String generateFromRepo(String repoPath) {
+	    String diff = GitDiffUtil.getDiff(repoPath);
+	    return generateMessage(diff);
+	}
+
 }

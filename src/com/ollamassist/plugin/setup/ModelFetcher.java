@@ -26,21 +26,21 @@ public class ModelFetcher {
 				while ((line = reader.readLine()) != null) {
 					response.append(line);
 				}
-				
-				JSONObject json = new JSONObject(response.toString());
-			    JSONArray modelArray = json.getJSONArray("models");
 
-			    for (int i = 0; i < modelArray.length(); i++) {
-			        JSONObject modelObj = modelArray.getJSONObject(i);
-			        String modelName = modelObj.optString("model", modelObj.optString("name", ""));
-			        if (!modelName.isEmpty()) {
-			            models.add(modelName);
-			        }
-			    }
+				JSONObject json = new JSONObject(response.toString());
+				JSONArray modelArray = json.getJSONArray("models");
+
+				for (int i = 0; i < modelArray.length(); i++) {
+					JSONObject modelObj = modelArray.getJSONObject(i);
+					String modelName = modelObj.optString("model", modelObj.optString("name", ""));
+					if (!modelName.isEmpty()) {
+						models.add(modelName);
+					}
+				}
 
 			}
 		} catch (Exception e) {
-			System.err.println("Failed to fetch models: " + e.getMessage());
+			System.err.println("[ModelFetcher] Error: " + e.getMessage());
 		}
 
 		// Fallback if none found

@@ -1,13 +1,13 @@
 package com.ollamassist.plugin.setup;
 
-import java.util.List;
-
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+
+import com.ollamassist.plugin.util.ModelSelectorUtil;
+import com.ollamassist.plugin.util.WizardUIUtil;
 
 public class ModelSelectionPage extends WizardPage {
 
@@ -21,16 +21,15 @@ public class ModelSelectionPage extends WizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
-		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(1, false));
+		Composite container = WizardUIUtil.createContainer(parent);
 
 		Label label = new Label(container, SWT.NONE);
 		label.setText("Available Models:");
 
 		modelCombo = new Combo(container, SWT.DROP_DOWN | SWT.READ_ONLY);
-		List<String> models = ModelFetcher.getInstalledModels();
-		modelCombo.setItems(models.toArray(new String[0]));
+		modelCombo.setItems(ModelSelectorUtil.getModelNames());
 		modelCombo.select(0);
+		ModelSelectorUtil.setSelectedModel(modelCombo.getText());
 
 		modelCombo.addListener(SWT.Selection, e -> {
 			SetupConfig.set("model", modelCombo.getText());

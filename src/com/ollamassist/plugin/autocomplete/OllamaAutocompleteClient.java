@@ -5,10 +5,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.ollamassist.plugin.rag.ProjectDependencyTracker;
+import com.ollamassist.plugin.util.OllamaPromptUtil;
 
 public class OllamaAutocompleteClient {
 
@@ -22,7 +21,8 @@ public class OllamaAutocompleteClient {
 		context.append(prefix).append("\n\n");
 
 		String prompt = "Based on this code, suggest the next line or completion:\n" + context;
-		String payload = "{\"model\":\"llama3.1\",\"prompt\":\"" + escapeJson(prompt) + "\",\"stream\":false}";
+		String payload = "{\"model\":\"llama3.1\",\"prompt\":\"" + OllamaPromptUtil.escapeJson(prompt)
+				+ "\",\"stream\":false}";
 
 		try {
 			HttpURLConnection conn = (HttpURLConnection) new URL(ENDPOINT).openConnection();
@@ -43,22 +43,10 @@ public class OllamaAutocompleteClient {
 			}
 			reader.close();
 
-			return parseResponse(response.toString());
+			return OllamaPromptUtil.parseResponse(response.toString());
 		} catch (Exception e) {
 			return "";
 		}
 	}
 
-	private static String escapeJson(String input) {
-		return input.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
-	}
-
-	private static String parseResponse(String json) {
-		Pattern pattern = Pattern.compile("\"response\":\"(.*?)\"");
-		Matcher matcher = pattern.matcher(json);
-		if (matcher.find()) {
-			return matcher.group(1).replace("\\n", "\n");
-		}
-		return "";
-	}
 }

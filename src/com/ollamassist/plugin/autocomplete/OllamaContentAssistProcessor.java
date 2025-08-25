@@ -1,5 +1,8 @@
 package com.ollamassist.plugin.autocomplete;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -8,6 +11,9 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+
+import com.ollamassist.plugin.util.ModelSelectorUtil;
+import com.ollamassist.plugin.util.OllamaQueryUtil;
 
 public class OllamaContentAssistProcessor implements IContentAssistProcessor {
 
@@ -71,4 +77,18 @@ public class OllamaContentAssistProcessor implements IContentAssistProcessor {
 			}
 		};
 	}
+
+	public static List<ICompletionProposal> generateProposals(String prefix, int offset) {
+		String model = ModelSelectorUtil.getDefaultModel();
+		String suggestion = OllamaQueryUtil.blockingQuery(prefix, model);
+
+		if (suggestion == null || suggestion.isEmpty() || suggestion.equals(prefix)) {
+			return new ArrayList<>();
+		}
+
+		String completion = suggestion.substring(prefix.length());
+		ICompletionProposal proposal = new CompletionProposal(completion, offset, 0, completion.length());
+		return List.of(proposal);
+	}
+
 }

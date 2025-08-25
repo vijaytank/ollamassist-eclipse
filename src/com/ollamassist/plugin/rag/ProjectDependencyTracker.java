@@ -10,40 +10,59 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+
+import com.ollamassist.plugin.util.SymbolExtractor;
 
 public class ProjectDependencyTracker {
 
 	private static final Map<String, Set<String>> symbolToFiles = new HashMap<>();
 	private static final Map<IFile, String> fileContents = new HashMap<>();
+	private static final List<String> indexedFilePaths = new ArrayList<>();
 
 	public static void indexWorkspace() {
 		symbolToFiles.clear();
 		fileContents.clear();
+		indexedFilePaths.clear();
 
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		try {
-			root.accept(resource -> {
-				if (resource instanceof IFile && "java".equals(resource.getFileExtension())) {
-					IFile file = (IFile) resource;
-					String content = readFile(file);
-					fileContents.put(file, content);
-
-					Set<String> symbols = extractSymbols(content);
-					for (String symbol : symbols) {
-						symbolToFiles.computeIfAbsent(symbol, k -> new HashSet<>()).add(file.getName());
-					}
+			for (IProject project : root.getProjects()) {
+				if (project.isOpen()) {
+					collectFiles(project);
 				}
-				return true;
-			});
+			}
 		} catch (CoreException e) {
 			System.err.println("Error indexing workspace: " + e.getMessage());
+		}
+	}
+
+	private static void collectFiles(IContainer container) throws CoreException {
+		for (IResource res : container.members()) {
+			if (res instanceof IFile && res.getFileExtension() != null
+					&& (res.getFileExtension().equals("java") || res.getFileExtension().equals("txt"))) {
+
+				IFile file = (IFile) res;
+				indexedFilePaths.add(file.getLocation().toOSString());
+
+				String content = readFile(file);
+				fileContents.put(file, content);
+
+				Set<String> symbols = SymbolExtractor.extractFromCode(content);
+				for (String symbol : symbols) {
+					symbolToFiles.computeIfAbsent(symbol, k -> new HashSet<>()).add(file.getName());
+				}
+
+			} else if (res instanceof IContainer) {
+				collectFiles((IContainer) res);
+			}
 		}
 	}
 
@@ -61,22 +80,8 @@ public class ProjectDependencyTracker {
 		return "";
 	}
 
-	private static Set<String> extractSymbols(String content) {
-		Set<String> symbols = new HashSet<>();
-
-		Pattern classPattern = Pattern.compile("\\bclass\\s+(\\w+)");
-		Matcher classMatcher = classPattern.matcher(content);
-		while (classMatcher.find()) {
-			symbols.add(classMatcher.group(1));
-		}
-
-		Pattern methodPattern = Pattern.compile("\\b(?:public|private|protected)?\\s+\\w+\\s+(\\w+)\\s*\\(");
-		Matcher methodMatcher = methodPattern.matcher(content);
-		while (methodMatcher.find()) {
-			symbols.add(methodMatcher.group(1));
-		}
-
-		return symbols;
+	public static List<String> getIndexedFilePaths() {
+		return new ArrayList<>(indexedFilePaths);
 	}
 
 	private static String readFile(IFile file) {
