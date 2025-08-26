@@ -1,11 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Automatic-Module-Name: com.ollamassist.plugin
-Bundle-Name: OllamAssist Plugin
-Bundle-SymbolicName: com.ollamassist.plugin;singleton:=true
-Bundle-Version: 1.0.0
-Bundle-Activator: com.ollamassist.plugin.Activator
+Automatic-Module-Name: com.localllama.plugin
+Bundle-Name: LocalLlama Plugin
+Bundle-SymbolicName: com.localllama.plugin;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.localllama.plugin.LocalLlamaActivator
 Bundle-ClassPath: .,lib/json-20240303.jar
+Bundle-ActivationPolicy: lazy
 Require-Bundle: 
  org.eclipse.ui,
  org.eclipse.core.runtime,

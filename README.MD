@@ -1,6 +1,6 @@
-# OllamAssist Plugin for Eclipse
+# LocalLlama Plugin for Eclipse
 
-**OllamAssist** is a privacy-first AI assistant designed to integrate seamlessly with Eclipse. Powered by local Ollama models, it enhances developer productivity through intelligent code interactions, commit message generation, and smart autocompletion—all without sending data to the cloud.
+**LocalLlama** is a privacy-first AI assistant designed to integrate seamlessly with Eclipse. Powered by local Ollama models, it enhances developer productivity through intelligent code interactions, commit message generation, and smart autocompletion—all without sending data to the cloud.
 
 ---
 
@@ -59,19 +59,19 @@
    ollama run llama3.1
    ```
 
-3. **Install OllamAssist Plugin**  
+3. **Install LocalLlama Plugin**  
    - Open Eclipse  
    - Go to `Help > Eclipse Marketplace`  
-   - Search for `"OllamAssist"`  
+   - Search for `"LocalLlama"`  
    - Click **Install**
 
 4. **Configure the Plugin**  
-   - Open `Window > Preferences > OllamAssist`  
+   - Open `Window > Preferences > LocalLlama`  
    - Select your model (e.g. `llama3.1`)  
    - Set your workspace indexing options
 
 5. **Start Coding**  
-   Use the OllamAssist view or autocomplete shortcuts to interact with your AI assistant.
+   Use the LocalLlama view or auto complete shortcuts to interact with your AI assistant.
 
 ---
 
@@ -99,7 +99,7 @@ We welcome contributions! Please open issues for bugs, feature requests, or impr
 
 ## 🔒 Privacy First
 
-OllamAssist runs entirely on your machine. No code, metadata, or queries are sent externally. Your workflow stays private.
+LocalLlama runs entirely on your machine. No code, metadata, or queries are sent externally. Your workflow stays private.
 
 ---
 
