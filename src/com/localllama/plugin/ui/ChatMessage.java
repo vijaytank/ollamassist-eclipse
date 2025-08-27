@@ -1,19 +1,33 @@
 package com.localllama.plugin.ui;
 
+import java.time.LocalTime;
+
 public class ChatMessage {
-	private String role;
-	private String content;
 
-	public ChatMessage(String role, String content) {
-		this.role = role;
-		this.content = content;
-	}
+    private final String message;
+    private final SenderType sender;
+    private final LocalTime timestamp;
 
-	public String getRole() {
-		return role;
-	}
+    public ChatMessage(String message, SenderType sender) {
+        this.message = message;
+        this.sender = sender;
+        this.timestamp = LocalTime.now();
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public String getMessage() {
+        return message;
+    }
+
+    public SenderType getSender() {
+        return sender;
+    }
+
+    public LocalTime getTimestamp() {
+        return timestamp;
+    }
+
+    public enum SenderType {
+        USER,
+        BOT
+    }
 }

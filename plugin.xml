@@ -103,12 +103,20 @@
     </menuContribution>
   </extension>
 
-  <!-- 🔹 Java Autocomplete (FIXED) -->
-  <extension point="org.eclipse.jdt.ui.javaCompletionProposalComputer">
-    <proposalComputer
-      id="com.localllama.plugin.autocomplete.proposals"
-      name="LocalLlama Proposals"
-      class="com.localllama.plugin.autocomplete.LocalLlamaProposalComputer"/>
-  </extension>
+  <!-- 🔹 Java Autocomplete -->
+  <extension
+         point="org.eclipse.ui.genericeditor.contentAssistProcessors">
+      <contentAssistProcessor
+            class="com.localllama.plugin.autocomplete.LocalLlamaContentAssistProcessor"
+            contentType="org.eclipse.core.runtime.text">
+      </contentAssistProcessor>
+   </extension>
 
+  <!-- 🔹 Resource Change Listener -->
+  <extension
+         point="org.eclipse.core.resources.resourceChangeListeners">
+      <listener
+            class="com.localllama.plugin.rag.ResourceChangeListener">
+      </listener>
+   </extension>
 </plugin>
