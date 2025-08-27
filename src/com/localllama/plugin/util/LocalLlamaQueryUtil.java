@@ -1,22 +1,30 @@
 package com.localllama.plugin.util;
 
-import org.eclipse.swt.widgets.Display;
-
 import com.localllama.plugin.service.LocalLlamaClient;
+import com.localllama.plugin.ui.ChatMessage;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+import org.eclipse.swt.widgets.Display;
 
 public class LocalLlamaQueryUtil {
 
-	public static void asyncQuery(String prompt, String model, java.util.function.Consumer<String> callback) {
-		Display.getDefault().asyncExec(() -> { // This method is already using the correct signature
-			String response = LocalLlamaClient.queryModel(prompt, model); // Ensure this calls the correct overloaded
-																			// method
-			callback.accept(response);
-		});
-	}
+    public static void asyncQuery(String prompt, String model, Consumer<String> callback) {
+        StringBuffer responseBuilder = new StringBuffer();
+        List<ChatMessage> messages = Collections.singletonList(new ChatMessage(ChatMessage.SenderType.USER, prompt));
 
-	public static String blockingQuery(String prompt, String model) { // This method is already using the correct
-																		// signature
-		return LocalLlamaClient.queryModel(prompt, model); // Ensure this calls the correct overloaded method
-	}
+        Runnable doneCallback = () -> {
+            Display.getDefault().asyncExec(() -> {
+                callback.accept(responseBuilder.toString());
+            });
+        };
 
+        Consumer<String> chunkCallback = responseBuilder::append;
+
+        LocalLlamaClient.streamingQuery(messages, model, chunkCallback, doneCallback);
+    }
+
+    public static String blockingQuery(String prompt, String model) {
+        return LocalLlamaClient.generateCompletion(prompt, model);
+    }
 }

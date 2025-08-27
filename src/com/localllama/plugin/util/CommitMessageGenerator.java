@@ -1,7 +1,6 @@
 package com.localllama.plugin.util;
 
 import com.localllama.plugin.preferences.LocalLlamaPreferenceStore;
-import com.localllama.plugin.service.LocalLlamaClient;
 
 public class CommitMessageGenerator {
 	public static String generateMessage(String diff) {
@@ -18,7 +17,7 @@ public class CommitMessageGenerator {
 					+ diff;
 		}
 		String model = LocalLlamaPreferenceStore.getModel();
-		return LocalLlamaClient.blockingQuery(prompt, model);
+		return LocalLlamaQueryUtil.blockingQuery(prompt, model);
 	}
 
 	public static String generateFromRepo(String repoPath) {

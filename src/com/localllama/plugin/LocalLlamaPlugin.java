@@ -1,9 +1,11 @@
 package com.localllama.plugin;
 
-import com.localllama.plugin.preferences.LocalLlamaPreferenceStore;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -19,16 +21,23 @@ public class LocalLlamaPlugin {
     private final Path indexPath;
 
     private LocalLlamaPlugin() {
-        this.indexPath = getStateLocation().append("index");
+        this.indexPath = getStateLocation().resolve("index");
+        try {
+            Files.createDirectories(this.indexPath.getParent());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private File getStateLocation() {
+    private Path getStateLocation() {
         try {
-            return Activator.getDefault().getStateLocation().toFile();
+            return LocalLlamaActivator.getDefault().getStateLocation().toPath();
         } catch (IllegalStateException e) {
-            File tempDir = new File(System.getProperty("java.io.tmpdir"), "localllama_state");
-            if (!tempDir.exists()) {
-                tempDir.mkdir();
+            Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "localllama_state");
+            try {
+                Files.createDirectories(tempDir);
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
             return tempDir;
         }
@@ -51,6 +60,7 @@ public class LocalLlamaPlugin {
             writer.addDocument(doc);
 
         } catch (IOException e) {
-            // Error handling for production would go here
-        }    }
+            e.printStackTrace();
+        }
+    }
 }

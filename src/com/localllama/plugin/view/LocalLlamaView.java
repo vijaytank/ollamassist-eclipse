@@ -1,17 +1,5 @@
 package com.localllama.plugin.view;
 
-import com.localllama.plugin.service.LocalLlamaClient;
-import com.localllama.plugin.ui.ChatMessage;
-import com.localllama.plugin.ui.ChatMessage.SenderType;
-import com.localllama.plugin.util.EclipseEditorUtil;
-import com.localllama.plugin.util.Logger;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
@@ -33,6 +21,21 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
+import com.localllama.plugin.preferences.LocalLlamaPreferenceStore;
+import com.localllama.plugin.service.LocalLlamaClient;
+import com.localllama.plugin.ui.ChatMessage;
+import com.localllama.plugin.ui.ChatMessage.SenderType;
+import com.localllama.plugin.util.EclipseEditorUtil;
+import com.localllama.plugin.util.Logger;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class LocalLlamaView extends ViewPart {
     public static final String ID = "com.localllama.plugin.view.LocalLlamaView";
 
@@ -42,7 +45,6 @@ public class LocalLlamaView extends ViewPart {
     private Composite chatHistory;
     private LocalResourceManager resourceManager;
     private final List<ChatMessage> messages = new ArrayList<>();
-    private StyledText currentBotMessageText;
 
     @Override
     public void createPartControl(Composite parent) {
@@ -106,17 +108,19 @@ public class LocalLlamaView extends ViewPart {
         addMessage(new ChatMessage(messageText, SenderType.USER));
         inputText.setText("");
 
-        addMessage(new ChatMessage("", SenderType.BOT));
+        StyledText botMessageText = addMessage(new ChatMessage("", SenderType.BOT));
 
         List<ChatMessage> queryMessages = new ArrayList<>(messages);
         queryMessages.get(queryMessages.size() - 2).setMessage(augmentedMessage);
 
         Logger.log("Sending message to LocalLlama...");
-        LocalLlamaClient.streamingQuery(queryMessages, "llama3.1",
+
+        String model = LocalLlamaPreferenceStore.getModel();
+        LocalLlamaClient.streamingQuery(queryMessages, model,
             (chunk) -> {
                 Display.getDefault().asyncExec(() -> {
-                    if (currentBotMessageText != null && !currentBotMessageText.isDisposed()) {
-                        currentBotMessageText.append(chunk);
+                    if (botMessageText != null && !botMessageText.isDisposed()) {
+                        botMessageText.append(chunk);
                         scrollToBottom();
                     }
                 });
@@ -125,7 +129,6 @@ public class LocalLlamaView extends ViewPart {
                 Display.getDefault().asyncExec(() -> {
                     sendButton.setEnabled(true);
                     inputText.setEnabled(true);
-                    currentBotMessageText = null;
                     Logger.log("Finished receiving response from LocalLlama");
                 });
             }
@@ -165,13 +168,14 @@ public class LocalLlamaView extends ViewPart {
         return null;
     }
 
-    private void addMessage(ChatMessage message) {
+    private StyledText addMessage(ChatMessage message) {
         messages.add(message);
-        renderMessage(message);
+        StyledText messageText = renderMessage(message);
         scrollToBottom();
+        return messageText;
     }
 
-    private void renderMessage(ChatMessage chatMessage) {
+    private StyledText renderMessage(ChatMessage chatMessage) {
         Composite messageComposite = new Composite(chatHistory, SWT.NONE);
         messageComposite.setLayout(new GridLayout(2, false));
         messageComposite.setBackground(chatHistory.getBackground());
@@ -187,9 +191,7 @@ public class LocalLlamaView extends ViewPart {
         messageText.setBackground(chatHistory.getBackground());
         messageText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        if (chatMessage.getSender() == SenderType.BOT) {
-            currentBotMessageText = messageText;
-        }
+        return messageText;
     }
 
     private void scrollToBottom() {

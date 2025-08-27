@@ -1,6 +1,6 @@
 package com.localllama.plugin.preferences;
 
-import com.localllama.plugin.Activator;
+import com.localllama.plugin.LocalLlamaActivator;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 public class LocalLlamaPreferenceStore {
@@ -9,9 +9,10 @@ public class LocalLlamaPreferenceStore {
     private static final String DEFAULT_OLLAMA_ENDPOINT = "http://localhost:11434";
     private static final String LOGGING_ENABLED = "logging_enabled";
     private static final String SELECTED_MODEL = "selected_model";
+	private static final String COMMIT_MESSAGE_PROMPT = "commit_message_prompt";
 
     public static IPreferenceStore getStore() {
-        return Activator.getDefault().getPreferenceStore();
+        return LocalLlamaActivator.getDefault().getPreferenceStore();
     }
 
     public static String getOllamaEndpoint() {
@@ -42,9 +43,18 @@ public class LocalLlamaPreferenceStore {
         getStore().setValue(SELECTED_MODEL, model);
     }
 
+	public static String getCommitMessagePrompt() {
+		return getStore().getString(COMMIT_MESSAGE_PROMPT);
+	}
+
+	public static void setCommitMessagePrompt(String prompt) {
+		getStore().setValue(COMMIT_MESSAGE_PROMPT, prompt);
+	}
+
     public static void initializeDefaults() {
         getStore().setDefault(OLLAMA_ENDPOINT, DEFAULT_OLLAMA_ENDPOINT);
         getStore().setDefault(LOGGING_ENABLED, false);
         getStore().setDefault(SELECTED_MODEL, "");
+		getStore().setDefault(COMMIT_MESSAGE_PROMPT, "");
     }
 }
