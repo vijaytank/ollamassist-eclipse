@@ -5,10 +5,13 @@ import com.localllama.plugin.util.IndexerUtil;
 import com.localllama.plugin.util.Logger;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.jar.JarFile;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -48,20 +51,36 @@ public class ProjectDependencyTracker {
         Logger.log("Indexing project: " + project.getName());
         try {
             IndexWriter writer = getIndexWriter(project);
+            List<IFile> filesToIndex = new ArrayList<>();
             project.accept(new IResourceVisitor() {
                 @Override
                 public boolean visit(IResource resource) throws CoreException {
                     if (resource instanceof IFile) {
                         IFile file = (IFile) resource;
-                        if ("java".equals(file.getFileExtension())) {
-                            IndexerUtil.indexFile(file, writer);
-                        } else if ("jar".equals(file.getFileExtension())) {
-                            indexJar(file, writer);
+                        String extension = file.getFileExtension();
+                        if ("java".equals(extension) || "jar".equals(extension)) {
+                            filesToIndex.add(file);
                         }
                     }
                     return true;
                 }
             });
+
+            List<Future<?>> futures = new ArrayList<>();
+            for (IFile file : filesToIndex) {
+                futures.add(executor.submit(() -> {
+                    if ("java".equals(file.getFileExtension())) {
+                        IndexerUtil.indexFile(file, writer);
+                    } else if ("jar".equals(file.getFileExtension())) {
+                        indexJar(file, writer);
+                    }
+                }));
+            }
+
+            for (Future<?> future : futures) {
+                future.get(); // Wait for all tasks to complete
+            }
+
             writer.commit();
             indexedProjects.put(project, true);
             Logger.log("Finished indexing project: " + project.getName());
@@ -84,7 +103,7 @@ public class ProjectDependencyTracker {
 
     private static void indexJar(IFile file, IndexWriter writer) {
         try (JarFile jarFile = new JarFile(file.getLocation().toFile())) {
-            JarIndexer.indexJar(jarFile, writer);
+            JarIndexer.indexJar(jarFile, writer, executor);
         } catch (IOException e) {
             Logger.error("Failed to index JAR file: " + file.getName(), e);
         }

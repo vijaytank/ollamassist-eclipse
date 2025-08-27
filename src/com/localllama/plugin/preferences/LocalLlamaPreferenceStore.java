@@ -12,7 +12,7 @@ public class LocalLlamaPreferenceStore {
     // Whether to enable logging
     private static final String LOGGING_ENABLED = "logging_enabled";
     // The currently selected model
-    private static final String SELECTED_MODEL = "selected_model";
+    private static final String SELECTED_MODEL = "model_name";
 	// The prompt to use for generating commit messages
     private static final String COMMIT_MESSAGE_PROMPT = "commit_message_prompt";
     // The default prompt for generating commit messages

@@ -1,6 +1,7 @@
 package com.localllama.plugin;
 
 import com.localllama.plugin.rag.ActiveFileIndexer;
+import com.localllama.plugin.rag.ProjectDependencyTracker;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +33,7 @@ public class LocalLlamaActivator extends AbstractUIPlugin {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		ActiveFileIndexer.shutdown();
+		ProjectDependencyTracker.closeAll();
 		plugin = null;
 		super.stop(context);
 	}
@@ -60,7 +62,7 @@ public class LocalLlamaActivator extends AbstractUIPlugin {
 	}
 
 	public Path getIndexPath() {
-		if (indexPath == null) {
+		if (indexPath ==.md) {
 			this.indexPath = getStateLocationPath().resolve("index");
 			try {
 				Files.createDirectories(this.indexPath);

@@ -5,6 +5,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import org.apache.lucene.document.Document;
@@ -15,12 +19,20 @@ import org.apache.lucene.index.IndexWriter;
 
 public class JarIndexer {
 
-    public static void indexJar(JarFile jarFile, IndexWriter writer) {
+    public static void indexJar(JarFile jarFile, IndexWriter writer, ExecutorService executor) {
         Logger.log("Indexing JAR: " + jarFile.getName());
         try {
             String jarPath = jarFile.getName();
+            List<JarEntry> javaEntries = new ArrayList<>();
             for (JarEntry entry : java.util.Collections.list(jarFile.entries())) {
                 if (!entry.isDirectory() && entry.getName().endsWith(".java")) {
+                    javaEntries.add(entry);
+                }
+            }
+
+            List<Future<?>> futures = new ArrayList<>();
+            for (JarEntry entry : javaEntries) {
+                futures.add(executor.submit(() -> {
                     try (InputStream is = jarFile.getInputStream(entry)) {
                         String content = readInputStream(is);
                         Document doc = new Document();
@@ -31,8 +43,13 @@ public class JarIndexer {
                     } catch (Exception e) {
                         Logger.error("Error indexing JAR entry " + entry.getName(), e);
                     }
-                }
+                }));
             }
+
+            for (Future<?> future : futures) {
+                future.get();
+            }
+
         } catch (Exception e) {
             Logger.error("Error indexing JAR file " + jarFile.getName(), e);
         }

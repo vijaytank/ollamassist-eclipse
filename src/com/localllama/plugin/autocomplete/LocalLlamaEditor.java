@@ -17,7 +17,7 @@ public class LocalLlamaEditor extends TextEditor {
 				assistant.setContentAssistProcessor(new LocalLlamaContentAssistProcessor(),
 						IDocument.DEFAULT_CONTENT_TYPE);
 				assistant.enableAutoActivation(true);
-				assistant.setAutoActivationDelay(500);
+				assistant.setAutoActivationDelay(0);
 				assistant.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
 				assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 				return assistant;

@@ -45,7 +45,7 @@ public class LocalLlamaContentAssistProcessor implements IContentAssistProcessor
                 try {
                     int line = document.getLineOfOffset(offset);
                     int lineOffset = document.getLineOffset(line);
-                    String prefix = document.get(lineOffset, offset - lineOffset).trim();
+                    String prefix = document.get(lineOffset, offset - lineOffset);
                     if (suggestion.startsWith(prefix)) {
                         displayString = suggestion.substring(prefix.length());
                     }

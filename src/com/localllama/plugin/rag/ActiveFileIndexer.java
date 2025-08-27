@@ -14,7 +14,7 @@ import org.eclipse.ui.PlatformUI;
 
 public class ActiveFileIndexer {
 
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static final ExecutorService executor = Executors.newFixedThreadPool(5);
 
     public static void indexFile(IFile file) {
         if (file == null) {
