@@ -1,8 +1,8 @@
 package com.localllama.plugin.autocomplete;
 
+import com.localllama.plugin.preferences.LocalLlamaPreferenceStore;
 import com.localllama.plugin.util.LocalLlamaQueryUtil;
 import com.localllama.plugin.util.Logger;
-import com.localllama.plugin.util.ModelSelectorUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +39,7 @@ public class LocalLlamaContentAssistProcessor implements IContentAssistProcessor
         String content = document.get();
 
         isLoading = true;
-        LocalLlamaQueryUtil.asyncQuery(content, ModelSelectorUtil.getDefaultModel(), suggestion -> {
+        LocalLlamaQueryUtil.asyncQuery(content, LocalLlamaPreferenceStore.getModel(), suggestion -> {
             if (suggestion != null && !suggestion.isEmpty()) {
                 Logger.log("Got suggestion: " + suggestion);
                 String displayString = suggestion;
