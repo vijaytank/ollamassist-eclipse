@@ -13,7 +13,6 @@ public class SetupWizardLauncher implements IStartup {
 		Display.getDefault().asyncExec(() -> {
 			ProjectDependencyTracker.indexAllOpenProjects();
 			LocalLlamaPreferenceStore.setWorkspaceIndexed(true);
-			LocalLlamaPreferenceStore.save();
 
 			boolean firstTime = !LocalLlamaPreferenceStore.isSetupComplete();
 			boolean connectionFailed = !LocalLlamaClient.isEndpointReachable();

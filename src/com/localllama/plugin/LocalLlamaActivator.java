@@ -2,19 +2,11 @@ package com.localllama.plugin;
 
 import com.localllama.plugin.rag.ActiveFileIndexer;
 import com.localllama.plugin.rag.ProjectDependencyTracker;
+import com.localllama.plugin.util.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.store.FSDirectory;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -50,40 +42,27 @@ public class LocalLlamaActivator extends AbstractUIPlugin {
 			}
 		} catch (IllegalStateException e) {
 			// This can happen if the plugin is not running, for example in a test environment.
+			Logger.error("Failed to get state location", e);
 		}
 		// Fallback to a temporary directory
 		Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "localllama_state");
 		try {
 			Files.createDirectories(tempDir);
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			Logger.error("Failed to create temporary directory", ex);
 		}
 		return tempDir;
 	}
 
 	public Path getIndexPath() {
-		if (indexPath ==.md) {
+		if (indexPath == null) {
 			this.indexPath = getStateLocationPath().resolve("index");
 			try {
 				Files.createDirectories(this.indexPath);
 			} catch (IOException e) {
-				e.printStackTrace();
+				Logger.error("Failed to create index directory", e);
 			}
 		}
 		return indexPath;
-	}
-
-	public void indexInput(String input) {
-		try (FSDirectory dir = FSDirectory.open(getIndexPath());
-			 IndexWriter writer = new IndexWriter(dir, new IndexWriterConfig(new StandardAnalyzer()))) {
-
-			Document doc = new Document();
-			doc.add(new StringField("id", String.valueOf(System.currentTimeMillis()), Field.Store.YES));
-			doc.add(new TextField("content", input, Field.Store.YES));
-			writer.addDocument(doc);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 }

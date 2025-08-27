@@ -32,7 +32,6 @@ public class WorkspaceIndexPage extends WizardPage {
 			ProjectDependencyTracker.indexAllOpenProjects();
 			statusLabel.setText("Status: Indexing complete");
 			LocalLlamaPreferenceStore.setWorkspaceIndexed(true);
-			LocalLlamaPreferenceStore.saveToDisk();
 			setPageComplete(true);
 		});
 

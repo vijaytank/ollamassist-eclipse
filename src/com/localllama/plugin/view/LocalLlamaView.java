@@ -24,7 +24,7 @@ import org.eclipse.ui.part.ViewPart;
 import com.localllama.plugin.preferences.LocalLlamaPreferenceStore;
 import com.localllama.plugin.service.LocalLlamaClient;
 import com.localllama.plugin.ui.ChatMessage;
-import com.localllama.plugin.ui.ChatMessage.SenderType;
+import com.localllama.plugin.ui.ChatMessage.Sender;
 import com.localllama.plugin.util.EclipseEditorUtil;
 import com.localllama.plugin.util.Logger;
 
@@ -33,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -105,10 +106,10 @@ public class LocalLlamaView extends ViewPart {
         String context = getContext(messageText);
         String augmentedMessage = context.isEmpty() ? messageText : context + "\n\n" + messageText;
 
-        addMessage(new ChatMessage(messageText, SenderType.USER));
+        addMessage(new ChatMessage(Sender.USER, messageText));
         inputText.setText("");
 
-        StyledText botMessageText = addMessage(new ChatMessage("", SenderType.BOT));
+        StyledText botMessageText = addMessage(new ChatMessage(Sender.BOT, ""));
 
         List<ChatMessage> queryMessages = new ArrayList<>(messages);
         queryMessages.get(queryMessages.size() - 2).setMessage(augmentedMessage);
@@ -116,23 +117,35 @@ public class LocalLlamaView extends ViewPart {
         Logger.log("Sending message to LocalLlama...");
 
         String model = LocalLlamaPreferenceStore.getModel();
-        LocalLlamaClient.streamingQuery(queryMessages, model,
-            (chunk) -> {
-                Display.getDefault().asyncExec(() -> {
-                    if (botMessageText != null && !botMessageText.isDisposed()) {
-                        botMessageText.append(chunk);
-                        scrollToBottom();
-                    }
-                });
-            },
-            () -> {
-                Display.getDefault().asyncExec(() -> {
-                    sendButton.setEnabled(true);
-                    inputText.setEnabled(true);
-                    Logger.log("Finished receiving response from LocalLlama");
-                });
-            }
-        );
+
+        Consumer<String> chunkCallback = (chunk) -> {
+            Display.getDefault().asyncExec(() -> {
+                if (botMessageText != null && !botMessageText.isDisposed()) {
+                    botMessageText.append(chunk);
+                    scrollToBottom();
+                }
+            });
+        };
+
+        Runnable doneCallback = () -> {
+            Display.getDefault().asyncExec(() -> {
+                sendButton.setEnabled(true);
+                inputText.setEnabled(true);
+                Logger.log("Finished receiving response from LocalLlama");
+            });
+        };
+
+        Consumer<String> errorCallback = (error) -> {
+            Display.getDefault().asyncExec(() -> {
+                Logger.error("Error from LocalLlama: " + error, null);
+                botMessageText.setText("Sorry, an error occurred: " + error);
+                sendButton.setEnabled(true);
+                inputText.setEnabled(true);
+                scrollToBottom();
+            });
+        };
+
+        LocalLlamaClient.streamingQuery(queryMessages, model, chunkCallback, doneCallback, errorCallback);
         sendButton.setEnabled(false);
         inputText.setEnabled(false);
     }
@@ -200,14 +213,14 @@ public class LocalLlamaView extends ViewPart {
         scrolledComposite.setOrigin(0, chatHistory.getSize().y);
     }
 
-    private Image getIcon(SenderType sender) {
-        String imageKey = sender == SenderType.USER ? ISharedImages.IMG_OBJ_ELEMENT : ISharedImages.IMG_TOOL_FORWARD;
+    private Image getIcon(Sender sender) {
+        String imageKey = sender == Sender.USER ? ISharedImages.IMG_OBJ_ELEMENT : ISharedImages.IMG_TOOL_FORWARD;
         return PlatformUI.getWorkbench().getSharedImages().getImage(imageKey);
     }
 
-    private Font getFont(SenderType sender) {
+    private Font getFont(Sender sender) {
         org.eclipse.swt.graphics.FontData[] fontData = JFaceResources.getDefaultFont().getFontData();
-        int style = sender == SenderType.USER ? SWT.BOLD : SWT.NORMAL;
+        int style = sender == Sender.USER ? SWT.BOLD : SWT.NORMAL;
         FontDescriptor descriptor = FontDescriptor.createFrom(fontData[0].getName(), fontData[0].getHeight(), style);
         return resourceManager.createFont(descriptor);
     }

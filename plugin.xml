@@ -105,16 +105,15 @@
 
   <!-- 🔹 Java Autocomplete -->
   <extension
-         point="org.eclipse.ui.genericeditor.contentAssistProcessors">
-      <contentAssistProcessor
+         point="org.eclipse.jdt.ui.javaCompletionProposalComputers">
+      <proposalComputer
             class="com.localllama.plugin.autocomplete.LocalLlamaContentAssistProcessor"
-            contentType="org.eclipse.core.runtime.text">
-      </contentAssistProcessor>
+            categoryId="org.eclipse.jdt.ui.javaCompletionProposals">
+      </proposalComputer>
    </extension>
 
   <!-- 🔹 Resource Change Listener -->
-  <extension
-         point="org.eclipse.core.resources.listeners">
+  <extension point="org.eclipse.core.resources.resourceChanges">
       <listener
             class="com.localllama.plugin.rag.ResourceChangeListener">
       </listener>

@@ -22,7 +22,6 @@ public class SetupWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		LocalLlamaPreferenceStore.setSetupComplete(true);
-		LocalLlamaPreferenceStore.save();
 		return true;
 	}
 

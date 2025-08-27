@@ -19,7 +19,7 @@ public class GitDiffUtil {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					Logger.error("Error from git diff: " + line);
+					Logger.error("Error from git diff: " + line, null);
 				}
 			}
 			return diff.toString();
