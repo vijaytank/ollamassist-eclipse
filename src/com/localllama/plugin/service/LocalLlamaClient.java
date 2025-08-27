@@ -112,4 +112,21 @@ public class LocalLlamaClient {
             Logger.log("Generation finished");
         }
     }
+
+    public static boolean isEndpointReachable() {
+        String endpoint = LocalLlamaPreferenceStore.getOllamaEndpoint();
+        if (endpoint == null || endpoint.isEmpty()) {
+            return false;
+        }
+        try {
+            URL url = new URL(endpoint);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(5000); // 5 seconds
+            conn.connect();
+            return conn.getResponseCode() == 200;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

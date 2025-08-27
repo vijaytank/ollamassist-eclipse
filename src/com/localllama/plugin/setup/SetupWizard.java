@@ -21,8 +21,8 @@ public class SetupWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-		LocalLlamaPreferenceStore.getInstance().setValue("setupComplete", true);
-		LocalLlamaPreferenceStore.saveToDisk(); // ✅ use the renamed static method
+		LocalLlamaPreferenceStore.setSetupComplete(true);
+		LocalLlamaPreferenceStore.save();
 		return true;
 	}
 

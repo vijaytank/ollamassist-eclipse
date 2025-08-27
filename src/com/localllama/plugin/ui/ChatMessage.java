@@ -4,7 +4,7 @@ import java.time.LocalTime;
 
 public class ChatMessage {
 
-    private final String message;
+    private String message;
     private final SenderType sender;
     private final LocalTime timestamp;
 
@@ -16,6 +16,10 @@ public class ChatMessage {
 
     public String getMessage() {
         return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public SenderType getSender() {
