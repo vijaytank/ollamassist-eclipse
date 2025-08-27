@@ -21,7 +21,12 @@ public class LocalLlamaQueryUtil {
 
         Consumer<String> chunkCallback = responseBuilder::append;
 
-        LocalLlamaClient.streamingQuery(messages, model, chunkCallback, doneCallback);
+        Consumer<String> errorCallback = error -> {
+            Logger.error("An error occurred during async query: " + error, null);
+            // Optionally, you can display the error to the user in the UI
+        };
+
+        LocalLlamaClient.streamingQuery(messages, model, chunkCallback, doneCallback, errorCallback);
     }
 
     public static String blockingQuery(String prompt, String model) {

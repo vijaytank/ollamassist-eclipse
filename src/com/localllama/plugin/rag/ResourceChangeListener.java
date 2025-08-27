@@ -18,7 +18,7 @@ public class ResourceChangeListener implements IResourceChangeListener {
                     if (resource instanceof IFile) {
                         if (delta.getKind() == IResourceDelta.CHANGED) {
                             Logger.log("Resource changed: " + resource.getName());
-                            ActiveFileIndexer.indexActiveFile();
+                            ActiveFileIndexer.indexFile((IFile) resource);
                         }
                     }
                     return true; // visit children

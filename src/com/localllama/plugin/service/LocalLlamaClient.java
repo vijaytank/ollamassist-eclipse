@@ -5,10 +5,12 @@ import com.localllama.plugin.ui.ChatMessage;
 import com.localllama.plugin.util.LocalLlamaJsonUtil;
 import com.localllama.plugin.util.Logger;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Consumer;
 import org.json.JSONArray;
@@ -16,18 +18,23 @@ import org.json.JSONObject;
 
 public class LocalLlamaClient {
 
-    public static void streamingQuery(List<ChatMessage> messages, String model, Consumer<String> chunkCallback, Runnable doneCallback) {
+    private static HttpURLConnection createConnection(String endpoint) throws IOException {
+        URL url = new URL(endpoint);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+        return conn;
+    }
+
+    public static void streamingQuery(List<ChatMessage> messages, String model, Consumer<String> chunkCallback, Runnable doneCallback, Consumer<String> errorCallback) {
         String endpoint = LocalLlamaPreferenceStore.getOllamaEndpoint() + "/api/chat";
         Logger.log("Streaming query to " + endpoint + " with model " + model);
 
         new Thread(() -> {
             HttpURLConnection conn = null;
             try {
-                URL url = new URL(endpoint);
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setDoOutput(true);
+                conn = createConnection(endpoint);
 
                 JSONObject payload = new JSONObject();
                 payload.put("model", model);
@@ -46,10 +53,10 @@ public class LocalLlamaClient {
                 Logger.log("Payload: " + payload.toString());
 
                 try (OutputStream os = conn.getOutputStream()) {
-                    os.write(payload.toString().getBytes("UTF-8"));
+                    os.write(payload.toString().getBytes(StandardCharsets.UTF_8));
                 }
 
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"))) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                     String line;
                     while ((line = br.readLine()) != null) {
                         String chunk = LocalLlamaJsonUtil.parseStreamingResponse(line);
@@ -60,7 +67,7 @@ public class LocalLlamaClient {
                 }
             } catch (Exception e) {
                 Logger.error("Error during streaming query", e);
-                chunkCallback.accept("Error: " + e.getMessage());
+                errorCallback.accept("Error: " + e.getMessage());
             } finally {
                 if (conn != null) {
                     conn.disconnect();
@@ -77,11 +84,7 @@ public class LocalLlamaClient {
 
         HttpURLConnection conn = null;
         try {
-            URL url = new URL(endpoint);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setDoOutput(true);
+            conn = createConnection(endpoint);
 
             JSONObject payload = new JSONObject();
             payload.put("model", model);
@@ -91,10 +94,10 @@ public class LocalLlamaClient {
             Logger.log("Payload: " + payload.toString());
 
             try (OutputStream os = conn.getOutputStream()) {
-                os.write(payload.toString().getBytes("UTF-8"));
+                os.write(payload.toString().getBytes(StandardCharsets.UTF_8));
             }
 
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"))) {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                 StringBuilder response = new StringBuilder();
                 String line;
                 while ((line = br.readLine()) != null) {

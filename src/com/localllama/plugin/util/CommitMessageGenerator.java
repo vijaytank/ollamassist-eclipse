@@ -4,6 +4,9 @@ import com.localllama.plugin.preferences.LocalLlamaPreferenceStore;
 
 public class CommitMessageGenerator {
 	public static String generateMessage(String diff) {
+		if (diff == null || diff.trim().isEmpty()) {
+			return "No changes to commit.";
+		}
 		// Retrieve custom prompt from preferences
 		String customPrompt = LocalLlamaPreferenceStore.getCommitMessagePrompt();
 		String prompt;
@@ -13,8 +16,7 @@ public class CommitMessageGenerator {
 			prompt = customPrompt + "\n\n" + diff;
 		} else {
 			// Default prompt for Conventional Commits
-			prompt = "Generate a concise Conventional Commit message for the following Git diff. The message should follow the format: type(scope): description\n\n[optional body]\n\n[optional footer].\n\n"
-					+ diff;
+			prompt = LocalLlamaPreferenceStore.getCommitMessagePrompt() + "\n\n" + diff;
 		}
 		String model = LocalLlamaPreferenceStore.getModel();
 		return LocalLlamaQueryUtil.blockingQuery(prompt, model);

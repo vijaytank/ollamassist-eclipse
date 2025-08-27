@@ -1,20 +1,17 @@
 package com.localllama.plugin.rag;
 
+import com.localllama.plugin.LocalLlamaActivator;
+import com.localllama.plugin.util.IndexerUtil;
 import com.localllama.plugin.util.Logger;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -36,12 +33,13 @@ public class ProjectDependencyTracker {
 
     private static final Map<IProject, Boolean> indexedProjects = new HashMap<>();
     private static final Map<IProject, IndexWriter> indexWriters = new HashMap<>();
+    private static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public static void indexAllOpenProjects() {
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
         for (IProject project : root.getProjects()) {
             if (project.isOpen() && !isProjectIndexed(project)) {
-                new Thread(() -> indexProject(project)).start();
+                executor.submit(() -> indexProject(project));
             }
         }
     }
@@ -56,7 +54,7 @@ public class ProjectDependencyTracker {
                     if (resource instanceof IFile) {
                         IFile file = (IFile) resource;
                         if ("java".equals(file.getFileExtension())) {
-                            indexFile(file, writer);
+                            IndexerUtil.indexFile(file, writer);
                         } else if ("jar".equals(file.getFileExtension())) {
                             indexJar(file, writer);
                         }
@@ -72,7 +70,7 @@ public class ProjectDependencyTracker {
         }
     }
 
-    public static IndexWriter getIndexWriter(IProject project) throws IOException {
+    public static synchronized IndexWriter getIndexWriter(IProject project) throws IOException {
         if (indexWriters.containsKey(project)) {
             return indexWriters.get(project);
         }
@@ -82,18 +80,6 @@ public class ProjectDependencyTracker {
         IndexWriter writer = new IndexWriter(dir, config);
         indexWriters.put(project, writer);
         return writer;
-    }
-
-    private static void indexFile(IFile file, IndexWriter writer) {
-        try {
-            String content = readFile(file);
-            Document doc = new Document();
-            doc.add(new StringField("filename", file.getName(), Field.Store.YES));
-            doc.add(new TextField("content", content, Field.Store.YES));
-            writer.addDocument(doc);
-        } catch (IOException e) {
-            Logger.error("Failed to index file: " + file.getName(), e);
-        }
     }
 
     private static void indexJar(IFile file, IndexWriter writer) {
@@ -108,10 +94,15 @@ public class ProjectDependencyTracker {
         if (indexedProjects.containsKey(project)) {
             return indexedProjects.get(project);
         }
-        Path indexPath = getIndexPath(project).resolve("segments_1");
-        boolean exists = indexPath.toFile().exists();
-        indexedProjects.put(project, exists);
-        return exists;
+        try {
+            Path indexPath = getIndexPath(project);
+            if (indexPath.toFile().exists()) {
+                return DirectoryReader.indexExists(FSDirectory.open(indexPath));
+            }
+        } catch (IOException e) {
+            Logger.error("Error checking if project is indexed", e);
+        }
+        return false;
     }
 
     public static String searchContent(IProject project, String symbol) {
@@ -127,12 +118,14 @@ public class ProjectDependencyTracker {
                 StringBuilder sb = new StringBuilder();
                 for (ScoreDoc sd : results.scoreDocs) {
                     Document doc = searcher.doc(sd.doc);
-                    String filename = doc.get("filename");
+                    String path = doc.get("path");
                     String jarEntry = doc.get("jar_entry");
-                    if (filename != null) {
-                        sb.append("// File: ").append(filename).append("\n");
-                    } else if (jarEntry != null) {
-                        sb.append("// JAR Entry: ").append(jarEntry).append("\n");
+                    if (path != null) {
+                        sb.append("// Path: ").append(path);
+                        if (jarEntry != null) {
+                            sb.append(" Entry: ").append(jarEntry);
+                        }
+                        sb.append("\n");
                     }
                     sb.append(doc.get("content")).append("\n\n");
                 }
@@ -145,23 +138,18 @@ public class ProjectDependencyTracker {
     }
 
     private static Path getIndexPath(IProject project) {
-        String userHome = System.getProperty("user.home");
-        String projectName = project.getName();
-        return Paths.get(userHome, ".localllama", "LocalLlamaAssist", projectName, "database", "knowledge_index");
+        return LocalLlamaActivator.getDefault().getIndexPath().resolve(project.getName());
     }
 
-    private static String readFile(IFile file) {
-        try (InputStream is = file.getContents();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\n");
+    public static void closeAll() {
+        executor.shutdown();
+        for (IndexWriter writer : indexWriters.values()) {
+            try {
+                writer.close();
+            } catch (IOException e) {
+                Logger.error("Error closing IndexWriter", e);
             }
-            return sb.toString();
-        } catch (Exception e) {
-            Logger.error("Error reading file " + file.getName(), e);
-            return "";
         }
+        indexWriters.clear();
     }
 }

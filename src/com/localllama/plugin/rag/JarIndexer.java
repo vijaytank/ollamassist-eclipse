@@ -4,6 +4,7 @@ import com.localllama.plugin.util.Logger;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import org.apache.lucene.document.Document;
@@ -17,11 +18,13 @@ public class JarIndexer {
     public static void indexJar(JarFile jarFile, IndexWriter writer) {
         Logger.log("Indexing JAR: " + jarFile.getName());
         try {
+            String jarPath = jarFile.getName();
             for (JarEntry entry : java.util.Collections.list(jarFile.entries())) {
                 if (!entry.isDirectory() && entry.getName().endsWith(".java")) {
                     try (InputStream is = jarFile.getInputStream(entry)) {
                         String content = readInputStream(is);
                         Document doc = new Document();
+                        doc.add(new StringField("path", jarPath, Field.Store.YES));
                         doc.add(new StringField("jar_entry", entry.getName(), Field.Store.YES));
                         doc.add(new TextField("content", content, Field.Store.YES));
                         writer.addDocument(doc);
@@ -37,10 +40,11 @@ public class JarIndexer {
 
     private static String readInputStream(InputStream is) throws Exception {
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\n");
+        char[] buffer = new char[4096];
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                sb.append(buffer, 0, n);
             }
         }
         return sb.toString();

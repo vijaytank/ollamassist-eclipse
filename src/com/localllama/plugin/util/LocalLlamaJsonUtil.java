@@ -6,6 +6,9 @@ import org.json.JSONObject;
 public class LocalLlamaJsonUtil {
 
     public static String parseStreamingResponse(String line) {
+        if (line == null || line.trim().isEmpty()) {
+            return "";
+        }
         try {
             JSONObject json = new JSONObject(line);
             if (json.has("message")) {
@@ -25,12 +28,15 @@ public class LocalLlamaJsonUtil {
     }
 
     public static String parseGenerationResponse(String response) {
+        if (response == null || response.trim().isEmpty()) {
+            return null;
+        }
         try {
             JSONObject json = new JSONObject(response);
             if (json.has("response")) {
                 return json.getString("response");
             }
-        } catch (Exception e) {
+        } catch (JSONException e) {
             Logger.error("Error parsing generation response", e);
         }
         return null;

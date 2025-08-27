@@ -1,5 +1,6 @@
 package com.localllama.plugin;
 
+import com.localllama.plugin.rag.ActiveFileIndexer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +31,7 @@ public class LocalLlamaActivator extends AbstractUIPlugin {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		ActiveFileIndexer.shutdown();
 		plugin = null;
 		super.stop(context);
 	}

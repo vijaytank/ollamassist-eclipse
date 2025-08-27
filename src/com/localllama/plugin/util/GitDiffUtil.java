@@ -9,14 +9,22 @@ public class GitDiffUtil {
 		try {
 			ProcessBuilder pb = new ProcessBuilder("git", "-C", repoPath, "diff");
 			Process process = pb.start();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			StringBuilder diff = new StringBuilder();
-			String line;
-			while ((line = reader.readLine()) != null) {
-				diff.append(line).append("\n");
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					diff.append(line).append("\n");
+				}
+			}
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					Logger.error("Error from git diff: " + line);
+				}
 			}
 			return diff.toString();
 		} catch (IOException e) {
+			Logger.error("Error fetching git diff", e);
 			return "Error fetching git diff: " + e.getMessage();
 		}
 	}
