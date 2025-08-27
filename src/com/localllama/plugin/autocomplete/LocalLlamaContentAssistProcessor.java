@@ -1,6 +1,5 @@
 package com.localllama.plugin.autocomplete;
 
-import com.localllama.plugin.service.LocalLlamaClient;
 import com.localllama.plugin.util.LocalLlamaQueryUtil;
 import com.localllama.plugin.util.Logger;
 import com.localllama.plugin.util.ModelSelectorUtil;
@@ -14,6 +13,8 @@ import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 public class LocalLlamaContentAssistProcessor implements IContentAssistProcessor {
 
@@ -55,7 +56,11 @@ public class LocalLlamaContentAssistProcessor implements IContentAssistProcessor
                 suggestions.add(new CompletionProposal(displayString, offset, 0, displayString.length()));
             }
             isLoading = false;
-            viewer.getTextWidget().getDisplay().asyncExec(() -> viewer.getContentAssistant().showPossibleCompletions());
+            viewer.getTextWidget().getDisplay().asyncExec(() -> {
+                if (viewer instanceof ISourceViewer) {
+                    ((ISourceViewer) viewer).getContentAssistant().showPossibleCompletions();
+                }
+            });
         });
 
         return new ICompletionProposal[0];
@@ -82,7 +87,7 @@ public class LocalLlamaContentAssistProcessor implements IContentAssistProcessor
     }
 
     @Override
-    public org.eclipse.jface.text.contentassist.IContextInformationValidator getContextInformationValidator() {
+    public IContextInformationValidator getContextInformationValidator() {
         return null;
     }
 }
