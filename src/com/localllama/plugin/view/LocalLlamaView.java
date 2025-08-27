@@ -24,7 +24,7 @@ import org.eclipse.ui.part.ViewPart;
 import com.localllama.plugin.preferences.LocalLlamaPreferenceStore;
 import com.localllama.plugin.service.LocalLlamaClient;
 import com.localllama.plugin.ui.ChatMessage;
-import com.localllama.plugin.ui.ChatMessage.Sender;
+import com.localllama.plugin.ui.ChatMessage.SenderType;
 import com.localllama.plugin.util.EclipseEditorUtil;
 import com.localllama.plugin.util.Logger;
 
@@ -106,10 +106,10 @@ public class LocalLlamaView extends ViewPart {
         String context = getContext(messageText);
         String augmentedMessage = context.isEmpty() ? messageText : context + "\n\n" + messageText;
 
-        addMessage(new ChatMessage(Sender.USER, messageText));
+        addMessage(new ChatMessage(messageText, SenderType.USER));
         inputText.setText("");
 
-        StyledText botMessageText = addMessage(new ChatMessage(Sender.BOT, ""));
+        StyledText botMessageText = addMessage(new ChatMessage("", SenderType.BOT));
 
         List<ChatMessage> queryMessages = new ArrayList<>(messages);
         queryMessages.get(queryMessages.size() - 2).setMessage(augmentedMessage);
@@ -213,14 +213,14 @@ public class LocalLlamaView extends ViewPart {
         scrolledComposite.setOrigin(0, chatHistory.getSize().y);
     }
 
-    private Image getIcon(Sender sender) {
-        String imageKey = sender == Sender.USER ? ISharedImages.IMG_OBJ_ELEMENT : ISharedImages.IMG_TOOL_FORWARD;
+    private Image getIcon(SenderType sender) {
+        String imageKey = sender == SenderType.USER ? ISharedImages.IMG_OBJ_ELEMENT : ISharedImages.IMG_TOOL_FORWARD;
         return PlatformUI.getWorkbench().getSharedImages().getImage(imageKey);
     }
 
-    private Font getFont(Sender sender) {
+    private Font getFont(SenderType sender) {
         org.eclipse.swt.graphics.FontData[] fontData = JFaceResources.getDefaultFont().getFontData();
-        int style = sender == Sender.USER ? SWT.BOLD : SWT.NORMAL;
+        int style = sender == SenderType.USER ? SWT.BOLD : SWT.NORMAL;
         FontDescriptor descriptor = FontDescriptor.createFrom(fontData[0].getName(), fontData[0].getHeight(), style);
         return resourceManager.createFont(descriptor);
     }

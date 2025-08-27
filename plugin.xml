@@ -113,7 +113,7 @@
    </extension>
 
   <!-- 🔹 Resource Change Listener -->
-  <extension point="org.eclipse.core.resources.resourceChanges">
+  <extension point="org.eclipse.core.resources.resourceChangeListener">
       <listener
             class="com.localllama.plugin.rag.ResourceChangeListener">
       </listener>
