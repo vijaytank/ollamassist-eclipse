@@ -6,7 +6,7 @@ import java.util.List;
 public class LocalLlamaSuggestionProvider {
 
 	public static final String ID = "com.localllama.plugin.autocomplete.proposals";
-	
+
 	public List<String> getSuggestions(String prefix) {
 		List<String> suggestions = new ArrayList<>();
 

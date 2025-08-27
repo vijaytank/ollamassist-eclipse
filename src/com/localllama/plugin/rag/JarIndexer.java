@@ -1,6 +1,5 @@
 package com.localllama.plugin.rag;
 
-import com.localllama.plugin.util.Logger;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,59 +10,62 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 
+import com.localllama.plugin.util.Logger;
+
 public class JarIndexer {
 
-    public static void indexJar(JarFile jarFile, IndexWriter writer, ExecutorService executor) {
-        Logger.log("Indexing JAR: " + jarFile.getName());
-        try {
-            String jarPath = jarFile.getName();
-            List<JarEntry> javaEntries = new ArrayList<>();
-            for (JarEntry entry : java.util.Collections.list(jarFile.entries())) {
-                if (!entry.isDirectory() && entry.getName().endsWith(".java")) {
-                    javaEntries.add(entry);
-                }
-            }
+	public static void indexJar(JarFile jarFile, IndexWriter writer, ExecutorService executor) {
+		Logger.log("Indexing JAR: " + jarFile.getName());
+		try {
+			String jarPath = jarFile.getName();
+			List<JarEntry> javaEntries = new ArrayList<>();
+			for (JarEntry entry : java.util.Collections.list(jarFile.entries())) {
+				if (!entry.isDirectory() && entry.getName().endsWith(".java")) {
+					javaEntries.add(entry);
+				}
+			}
 
-            List<Future<?>> futures = new ArrayList<>();
-            for (JarEntry entry : javaEntries) {
-                futures.add(executor.submit(() -> {
-                    try (InputStream is = jarFile.getInputStream(entry)) {
-                        String content = readInputStream(is);
-                        Document doc = new Document();
-                        doc.add(new StringField("path", jarPath, Field.Store.YES));
-                        doc.add(new StringField("jar_entry", entry.getName(), Field.Store.YES));
-                        doc.add(new TextField("content", content, Field.Store.YES));
-                        writer.addDocument(doc);
-                    } catch (Exception e) {
-                        Logger.error("Error indexing JAR entry " + entry.getName(), e);
-                    }
-                }));
-            }
+			List<Future<?>> futures = new ArrayList<>();
+			for (JarEntry entry : javaEntries) {
+				futures.add(executor.submit(() -> {
+					try (InputStream is = jarFile.getInputStream(entry)) {
+						String content = readInputStream(is);
+						Document doc = new Document();
+						doc.add(new StringField("path", jarPath, Field.Store.YES));
+						doc.add(new StringField("jar_entry", entry.getName(), Field.Store.YES));
+						doc.add(new TextField("content", content, Field.Store.YES));
+						writer.addDocument(doc);
+					} catch (Exception e) {
+						Logger.error("Error indexing JAR entry " + entry.getName(), e);
+					}
+				}));
+			}
 
-            for (Future<?> future : futures) {
-                future.get();
-            }
+			for (Future<?> future : futures) {
+				future.get();
+			}
 
-        } catch (Exception e) {
-            Logger.error("Error indexing JAR file " + jarFile.getName(), e);
-        }
-    }
+		} catch (Exception e) {
+			Logger.error("Error indexing JAR file " + jarFile.getName(), e);
+		}
+	}
 
-    private static String readInputStream(InputStream is) throws Exception {
-        StringBuilder sb = new StringBuilder();
-        char[] buffer = new char[4096];
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-            int n;
-            while ((n = reader.read(buffer)) != -1) {
-                sb.append(buffer, 0, n);
-            }
-        }
-        return sb.toString();
-    }
+	private static String readInputStream(InputStream is) throws Exception {
+		StringBuilder sb = new StringBuilder();
+		char[] buffer = new char[4096];
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+			int n;
+			while ((n = reader.read(buffer)) != -1) {
+				sb.append(buffer, 0, n);
+			}
+		}
+		return sb.toString();
+	}
 }
